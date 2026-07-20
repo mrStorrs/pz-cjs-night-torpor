@@ -1,0 +1,11 @@
+name=CJS Night Torpor
+id=cjsNightTorpor
+author=CJ Storrs
+description=Keeps zombies at full speed at night while sharply weakening their hearing, sight, and target memory.
+poster=poster.png
+modversion=1.0.0
+versionMin=42.19.0
+require=\ZombieBuddy
+javaJarFile=media/java/CJSNightTorpor.jar
+javaPkgName=com.cjstorrs.cjsnighttorpor
+ZBVersionMin=2.3.2
