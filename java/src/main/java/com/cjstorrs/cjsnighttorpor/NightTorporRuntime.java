@@ -1,5 +1,6 @@
 package com.cjstorrs.cjsnighttorpor;
 
+import zombie.GameTime;
 import zombie.SandboxOptions;
 import zombie.characters.IsoZombie;
 
@@ -8,18 +9,14 @@ public final class NightTorporRuntime {
     private NightTorporRuntime() {
     }
 
-    public static boolean replaceInactivityTransition(IsoZombie zombie, boolean requestedInactive) {
-        if (requestedInactive == zombie.inactive) {
-            return false;
-        }
-
+    public static boolean updateActivityWithoutChangingSpeed(IsoZombie zombie) {
         int activeOnly = SandboxOptions.instance.lore.activeOnly.getValue();
-        if (!NightTorporPolicy.shouldReplaceTransition(requestedInactive, zombie.inactive, activeOnly)) {
+        if (!NightTorporPolicy.shouldReplaceActivityUpdate(activeOnly)) {
             return false;
         }
 
-        // Preserve vanilla sensory torpor while bypassing makeInactive's speed mutations.
-        zombie.inactive = requestedInactive;
+        // Keep vanilla sensory torpor while leaving every speed-related field untouched.
+        zombie.inactive = GameTime.getInstance().isNight();
         return true;
     }
 

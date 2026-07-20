@@ -9,8 +9,8 @@ public final class NightTorporPolicy {
     private NightTorporPolicy() {
     }
 
-    public static boolean shouldReplaceTransition(boolean requestedInactive, boolean currentInactive, int activeOnly) {
-        return requestedInactive != currentInactive && activeOnly == ACTIVE_DURING_DAY;
+    public static boolean shouldReplaceActivityUpdate(int activeOnly) {
+        return activeOnly == ACTIVE_DURING_DAY;
     }
 
     public static boolean isNightTorporActive(boolean inactive, int activeOnly) {

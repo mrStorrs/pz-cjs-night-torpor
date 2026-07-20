@@ -23,10 +23,8 @@ public final class NightTorporPatchTest {
     }
 
     private static void testPolicy() {
-        check(NightTorporPolicy.shouldReplaceTransition(true, false, 3), "night transition should be replaced");
-        check(NightTorporPolicy.shouldReplaceTransition(false, true, 3), "day transition should be replaced");
-        check(!NightTorporPolicy.shouldReplaceTransition(true, true, 3), "steady night state should pass through");
-        check(!NightTorporPolicy.shouldReplaceTransition(true, false, 2), "night-active mode must retain vanilla behavior");
+        check(NightTorporPolicy.shouldReplaceActivityUpdate(3), "day-active activity updates should be replaced");
+        check(!NightTorporPolicy.shouldReplaceActivityUpdate(2), "night-active mode must retain vanilla behavior");
         check(NightTorporPolicy.isNightTorporActive(true, 3), "inactive day-active zombies should have torpor");
         check(!NightTorporPolicy.isNightTorporActive(false, 3), "active zombies should not have torpor");
         check(!NightTorporPolicy.isNightTorporActive(true, 2), "daytime inactivity must not count as night torpor");
@@ -44,18 +42,16 @@ public final class NightTorporPatchTest {
             check(patch.warmUp(), patchClass.getName() + " must warm up");
         }
 
-        assertTarget(NightTorporPatches.PreserveNightSpeed.class, "zombie.characters.IsoZombie", "makeInactive");
+        assertTarget(NightTorporPatches.PreserveNightSpeed.class, "zombie.characters.IsoZombie", "updateActiveState");
         assertTarget(NightTorporPatches.WeakenNightHearing.class, "zombie.WorldSoundManager", "getHearingMultiplier");
         Method speedEnter = NightTorporPatches.PreserveNightSpeed.class.getDeclaredMethod(
             "enter",
-            IsoZombie.class,
-            boolean.class
+            IsoZombie.class
         );
         Patch.OnEnter onEnter = speedEnter.getAnnotation(Patch.OnEnter.class);
         check(onEnter != null && onEnter.skipOn(), "speed advice must skip vanilla on handled transitions");
         check(speedEnter.getReturnType() == boolean.class, "speed advice skip result must be boolean");
         check(speedEnter.getParameters()[0].isAnnotationPresent(Patch.This.class), "speed advice must bind the zombie");
-        assertArgument(speedEnter.getParameters()[1], 0, "inactive argument");
         Method hearingExit = NightTorporPatches.WeakenNightHearing.class.getDeclaredMethod(
             "exit",
             IsoZombie.class,
@@ -85,8 +81,9 @@ public final class NightTorporPatchTest {
     }
 
     private static void testGameApiLinkage() throws ReflectiveOperationException {
-        check(IsoZombie.class.getDeclaredMethod("makeInactive", boolean.class).getReturnType() == void.class,
-            "IsoZombie inactivity signature changed");
+        Method activityUpdate = IsoZombie.class.getDeclaredMethod("updateActiveState");
+        check(activityUpdate.getReturnType() == void.class, "IsoZombie activity-update signature changed");
+        check(Modifier.isPrivate(activityUpdate.getModifiers()), "IsoZombie activity-update visibility changed");
         check(WorldSoundManager.class.getDeclaredMethod("getHearingMultiplier", IsoZombie.class).getReturnType() == float.class,
             "WorldSoundManager hearing signature changed");
         Method memory = IsoZombie.class.getDeclaredMethod("getSandboxMemoryDuration");

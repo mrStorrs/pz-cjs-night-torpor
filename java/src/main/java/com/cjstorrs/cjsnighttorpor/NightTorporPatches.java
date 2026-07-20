@@ -9,17 +9,14 @@ public final class NightTorporPatches {
 
     @Patch(
         className = "zombie.characters.IsoZombie",
-        methodName = "makeInactive",
+        methodName = "updateActiveState",
         warmUp = true,
         strictMatch = true
     )
     public static class PreserveNightSpeed {
         @Patch.OnEnter(skipOn = true)
-        public static boolean enter(
-            @Patch.This IsoZombie zombie,
-            @Patch.Argument(0) boolean inactive
-        ) {
-            return NightTorporRuntime.replaceInactivityTransition(zombie, inactive);
+        public static boolean enter(@Patch.This IsoZombie zombie) {
+            return NightTorporRuntime.updateActivityWithoutChangingSpeed(zombie);
         }
     }
 
